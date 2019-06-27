@@ -1,7 +1,9 @@
 import java.io.IOException;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
@@ -17,6 +19,8 @@ public class OSRA {
 	private String flowsEndpoint;
 	private String authorizationEndpoint;
 	private String environmentEndpoint;
+	
+	
 	/**
 	 * Create instance of OSRA
 	 * @param user username to connect to ONOS Northbound API REST
@@ -49,7 +53,7 @@ public class OSRA {
 	}
 
 	/**
-	 * Open a TCP socket with maximum bandwidth and burst
+	 * Open a TCP socket with given maximum bandwidth and burst
 	 * @param ipAddress ipAddress to connect
 	 * @param port port to connect
 	 * @param rate maximum bandwidth for this socket
@@ -73,11 +77,13 @@ public class OSRA {
 		localPort = socket.getLocalPort();
 		localAddress = socket.getLocalAddress().getHostAddress();
 
-		
+
 		try {
-			// Request meter
-			postMeter("10.0.0.1", localPort, "tcp", rate, burst);
-			//postMeter(localAddress, localPort, "tcp", rate, burst);
+			//TEST only
+			//postMeter("10.0.0.1", localPort, "tcp", rate, burst);
+
+			// TODO: implementacion
+			postMeter(localAddress, localPort, "tcp", rate, burst);
 
 		} catch (IOException e) {
 			if (socket != null) {
@@ -90,20 +96,26 @@ public class OSRA {
 
 	}
 
-	public DatagramSocket openUDPSocket(int rate, int burst) throws IOException {
-		DatagramSocket socket;
+	public ServerSocket openUDPSocket(String ip, int port, int rate, int burst) throws IOException {
+		//DatagramSocket socket;
+		ServerSocket socket;
+		int localPort = -1;
+		String localAddress = "";
+		
 		try {
-			socket = new DatagramSocket();
+			//socket = new DatagramSocket(port, InetAddress.getByName(ip));
+			socket = new ServerSocket(port, 10, InetAddress.getByName(ip));
 		} catch (SocketException e) {
 			e.printStackTrace();
 			throw e;
 		}
+
 		
-		String localAddress = socket.getLocalAddress().getHostAddress();
-		int localPort = socket.getLocalPort();
+		localAddress = socket.getInetAddress().getHostAddress();
+		localPort = socket.getLocalPort();
 
 		try {
-			postMeter(localAddress, localPort, "upd", rate, burst);
+			postMeter(localAddress, localPort, "udp", rate, burst);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
@@ -121,17 +133,17 @@ public class OSRA {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	private void postMeter(String localAddress, int port, String portType, int rate, int burst) throws MalformedURLException, IOException {
+	private void postMeter(String localAddress, int localPort, String portType, int rate, int burst) throws MalformedURLException, IOException {
 		String body = "{\n" + 
 				"	\"host\": \""+localAddress+"\",\n" + 
-				"	\"port\": \""+port+"\",\n" + 
+				"	\"port\": \""+localPort+"\",\n" + 
 				"	\"portType\": \""+portType+"\",\n" + 
 				"	\"rate\": "+rate+",\n" + 
 				"	\"burst\": "+burst+"\n" + 
 				"}";
 
 		// Request meter
-		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+localAddress+"/"+port), body);
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+localAddress+"/"+localPort), body);
 	}
 
 
@@ -150,10 +162,13 @@ public class OSRA {
 				e.printStackTrace();
 				throw e;
 			}
-			
-			HttpTools.doDelete(new URL(this.metersEndpoint+"/10.0.0.1"+"/port/"+socket.getLocalPort()));
-			//HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()));
-			
+
+			//TEST only
+			//HttpTools.doDelete(new URL(this.metersEndpoint+"/10.0.0.1"+"/port/"+socket.getLocalPort()));
+
+			// TODO: Implementacion
+			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()));
+
 		}
 
 	}
@@ -163,12 +178,20 @@ public class OSRA {
 	/**
 	 * Close UDP socket
 	 * @param socket UDP socket to close
+	 * @throws IOException 
+	 * @throws MalformedURLException 
 	 */
-	public void closeUDPSocket(DatagramSocket socket) {
+	public void closeUDPSocket(DatagramSocket socket) throws MalformedURLException, IOException {
+		// If socket is not closed
 		if( (socket != null) && (!socket.isClosed()) ) {
 			socket.close();
-			
-			// TODO: DELETE meter for ip/port
+
+			//TEST only
+			//HttpTools.doDelete(new URL(this.metersEndpoint+"/10.0.0.1"+"/port/"+socket.getLocalPort()));
+
+			// TODO: Implementacion
+			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()));
+
 		}
 	}
 }

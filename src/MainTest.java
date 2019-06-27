@@ -20,7 +20,7 @@ public class MainTest {
 		}
 		try {
 			Socket socket = osra.openTCPSocket("localhost", 8080, 100000, 1000000);
-
+			
 
 //			entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //			salida = new PrintWriter(new BufferedWriter(new 
