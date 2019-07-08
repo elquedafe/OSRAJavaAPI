@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -5,6 +6,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
+
+import org.osra.architecture.*;
+
 
 public class MainTest {
 
@@ -13,51 +18,38 @@ public class MainTest {
 		OSRA osra = null;
 		BufferedReader entrada = null;
 		PrintWriter salida = null;
+		//OSRA.register("alvaro","alvaro", "localhost");
 		try {
-			osra = new OSRA("onos", "rocks", "localhost", "localhost");
+			osra = new OSRA("alvaro", "alvaro", "localhost", "localhost");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
-			Socket socket = osra.openTCPSocket("localhost", 8080, 100000, 1000000);
 			
-
-//			entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//			salida = new PrintWriter(new BufferedWriter(new 
-//					OutputStreamWriter(socket.getOutputStream())),true);
-//
-//			BufferedReader stdIn =
-//					new BufferedReader(new InputStreamReader(System.in));
-//
-//			String linea;
-//
-//			try {
-//				while (true) {
-//					// Leo la entrada del usuario
-//					linea = stdIn.readLine();
-//					// La envia al servidor
-//					salida.println(linea);
-//					// Envía a la salida estándar la respuesta del servidor
-//					linea = entrada.readLine();
-//					System.out.println("Respuesta servidor: " + linea);
-//					// Si es "Adios" es que finaliza la comunicación
-//					if (linea.equals("Adios")) break;
-//				}
-//			} catch (IOException e) {
-//				System.out.println("IOException: " + e.getMessage());
-//			}
-//			salida.close();
-//			entrada.close();
-//			stdIn.close();
+			/*********POST METER***************/
+			osra.createMeter("10.0.0.3", "", "", "", "tcp", 1000, 1000);
+			
+			/******POST FLOW*********/
+//			osra.createFlows("10.0.0.1", "10.0.0.4", "80", "5000", "udp");
+			
+			/********GET METERS************/
+//			List<Meter> meters = osra.getMeters();
+			
+			/********GET FLOWS*********/
+//			List<Flow> flows = osra.getFlows();
+			
+			/********GET ENVIRONMENT*********/
+//			Environment env = osra.getEnvironment();
+			
+			/*********SOCKETS WITH QoS***********/
+//			Socket socket = osra.openTCPSocket("localhost", 8080, 100000, 1000000);
 //			
-			
-			
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			osra.closeTCPSocket(socket);
+//			try {
+//				Thread.sleep(5000);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//			osra.closeTCPSocket(socket);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -10,9 +10,11 @@ import java.net.URL;
 import java.util.Base64;
 
 
+
 public class HttpTools {
 
-	public static RestResponse doJSONPost(URL url, String body) throws IOException{
+	public static RestResponse doJSONPost(URL url, String body, String user, String password) throws IOException{
+		String encoding;
 		String line;
 		RestResponse response= new RestResponse();
 		HttpURLConnection connection = null;
@@ -22,11 +24,13 @@ public class HttpTools {
 
 
 		try {
+			encoding = Base64.getEncoder().encodeToString((user + ":"+ password).getBytes("UTF-8"));
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 			connection.setRequestProperty("Accept", "application/json");
+			connection.setRequestProperty("Authorization", "Basic " + encoding);
 			OutputStream os = connection.getOutputStream();
 			osw = new OutputStreamWriter(os, "UTF-8");    
 			osw.write(body);
@@ -59,7 +63,8 @@ public class HttpTools {
 		return response;
 	}
 
-	public static RestResponse doDelete(URL url) throws IOException{
+	public static RestResponse doDelete(URL url, String user, String password) throws IOException{
+		String encoding;
 		String line;
 		RestResponse response= new RestResponse();
 		HttpURLConnection connection = null;
@@ -68,9 +73,11 @@ public class HttpTools {
 		BufferedReader inError = null;
 		
 		try {
+			encoding = Base64.getEncoder().encodeToString((user + ":"+ password).getBytes("UTF-8"));
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("DELETE");
 			connection.setDoOutput(true);
+			connection.setRequestProperty("Authorization", "Basic " + encoding);
 			
 			//MAYBE COMENTAR
 			InputStream content = (InputStream)connection.getInputStream();
@@ -100,17 +107,20 @@ public class HttpTools {
 		return response;
 	}
 
-	public static RestResponse doJSONGet(URL url) throws IOException{
+	public static RestResponse doJSONGet(URL url, String user, String password) throws IOException{
+		String encoding;
 		RestResponse response = new RestResponse();
 		String line;
 		String json="";
 		HttpURLConnection connection = null;
 		
-		
 		try {
+			encoding = Base64.getEncoder().encodeToString((user + ":"+ password).getBytes("UTF-8"));
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setDoOutput(true);
+			connection.setRequestProperty("Authorization", "Basic " + encoding);
+			
 			InputStream content = (InputStream)connection.getInputStream();
 			response.setCode(connection.getResponseCode());
 			BufferedReader in   = 

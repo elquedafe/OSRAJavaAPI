@@ -8,8 +8,19 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.osra.architecture.Environment;
+import org.osra.architecture.Flow;
+import org.osra.architecture.Meter;
+import org.osra.architecture.Switch;
 import org.osra.tools.HttpTools;
+import org.osra.tools.JsonParser;
+import org.osra.tools.RestResponse;
+
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 public class OSRA {
 	private String restHost;
@@ -19,32 +30,40 @@ public class OSRA {
 	private String flowsEndpoint;
 	private String authorizationEndpoint;
 	private String environmentEndpoint;
-	
-	
+	private String user;
+	private String password;
+
 	/**
 	 * Create instance of OSRA
 	 * @param user username to connect to ONOS Northbound API REST
 	 * @param password password to connect to ONOS Northbound API REST
-	 * @param restHost hostname or ip address where OSRA is running
-	 * @param onosHost ONOS hostname or ip address where OSRA is running
+	 * @param restServerHost hostname or ip address where OSRA is running
+	 * @param onosHost ONOS hostname or ip address where ONOS is running
 	 * @throws IOException
 	 */
-	public OSRA(String user, String password, String restHost, String onosHost) throws IOException {
-		this.restHost = restHost;
-		this.endpoint = "http://"+restHost+":8080/onosapp-v1/rest";
-		this.metersEndpoint = endpoint+"/meters";
-		this.vplsEndpoint = endpoint+"/vpls";
-		this.flowsEndpoint = endpoint+"/flows";
-		this.authorizationEndpoint = endpoint+"/authorization";
-		this.environmentEndpoint = endpoint+"/environment";
+	public OSRA(String user, String password, String restServerHost, String onosHost) throws IOException {
+		this.user = user;
+		this.password = password;
+		this.restHost = restServerHost;
+		this.endpoint = "http://"+restServerHost+":8080/onosapp-v1";
+		this.authorizationEndpoint = endpoint+"/rest/authorization";
+
+		String sufix = "";
+		if(isAdmin()) sufix = "administration";
+		else sufix = "users";
+
+		this.metersEndpoint = endpoint+"/"+ sufix+"/meters";
+		this.vplsEndpoint = endpoint+"/"+ sufix+"/vpls";
+		this.flowsEndpoint = endpoint+"/"+ sufix+"/flows";
+		this.environmentEndpoint = endpoint+"/"+ sufix+"/environment";
 
 		String body = "{\n" + 
-				"	\"user\":\""+user+"\",\n" + 
-				"	\"password\":\""+password+"\",\n" + 
+				"	\"userOnos\":\"onos\",\n" + 
+				"	\"passwordOnos\":\"rocks\",\n" + 
 				"	\"onosHost\": \""+onosHost+"\"\n" + 
 				"}";
 		try {
-			HttpTools.doJSONPost(new URL(authorizationEndpoint), body);
+			HttpTools.doJSONPost(new URL(authorizationEndpoint), body, user, password);
 		}catch (IOException e) {
 			e.printStackTrace();
 			throw e;
@@ -101,7 +120,7 @@ public class OSRA {
 		ServerSocket socket;
 		int localPort = -1;
 		String localAddress = "";
-		
+
 		try {
 			//socket = new DatagramSocket(port, InetAddress.getByName(ip));
 			socket = new ServerSocket(port, 10, InetAddress.getByName(ip));
@@ -110,7 +129,7 @@ public class OSRA {
 			throw e;
 		}
 
-		
+
 		localAddress = socket.getInetAddress().getHostAddress();
 		localPort = socket.getLocalPort();
 
@@ -143,7 +162,7 @@ public class OSRA {
 				"}";
 
 		// Request meter
-		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+localAddress+"/"+localPort), body);
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+localAddress+"/"+localPort), body, user, password);
 	}
 
 
@@ -167,7 +186,7 @@ public class OSRA {
 			//HttpTools.doDelete(new URL(this.metersEndpoint+"/10.0.0.1"+"/port/"+socket.getLocalPort()));
 
 			// TODO: Implementacion
-			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()));
+			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()), user, password);
 
 		}
 
@@ -190,8 +209,133 @@ public class OSRA {
 			//HttpTools.doDelete(new URL(this.metersEndpoint+"/10.0.0.1"+"/port/"+socket.getLocalPort()));
 
 			// TODO: Implementacion
-			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()));
+			HttpTools.doDelete(new URL(this.metersEndpoint+"/"+socket.getLocalAddress().getHostAddress()+"/port/"+socket.getLocalPort()), user, password);
 
 		}
 	}
+
+	public static boolean register(String user, String password, String restServer) {
+		String json = "{\n" +
+				"   \"user\":\""+user+"\",\n" +
+				"   \"password\":\""+password+"\"\n" +
+				"}";
+		try {
+			HttpTools.doJSONPost(new URL("http://"+restServer+":8080/onosapp-v1/rest/register"), json, user, password);
+			return true;
+		} catch (IOException ex) {
+			return false;
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private boolean isAdmin() {
+		Gson gson = new Gson();
+		RestResponse response;
+		try {
+			response = HttpTools.doJSONGet(new URL(authorizationEndpoint), user, password);
+		} catch (MalformedURLException ex) {
+			return false;
+		} catch (IOException ex) {
+			return false;
+		}
+
+		LinkedTreeMap jsonObject = gson.fromJson(response.getMessage(), LinkedTreeMap.class);
+		return (boolean)jsonObject.get("isAdmin");
+	}
+	
+	public Environment getEnvironment() throws IOException {
+		RestResponse response;
+		String json;
+		response = HttpTools.doJSONGet(new URL(environmentEndpoint), user, password);
+        return JsonParser.parseEnvironment(response.getMessage());
+	}
+
+	public List<Flow> getFlows() throws IOException{
+		RestResponse response;
+		response = HttpTools.doJSONGet(new URL(this.flowsEndpoint), user, password);
+		return JsonParser.parseFlows(response.getMessage());
+	}
+
+	public void createFlows(String srcHost, String dstHost, String srcPort, String dstPort, String portType) throws IOException {
+		String json = "{\n" +
+				"\"ipVersion\": 4,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" +
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\"\n" +
+				"}";
+		HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
+	}
+	
+	public void createFlowsIpv6(String srcHost, String dstHost, String srcPort, String dstPort, String portType) throws IOException {
+		String json = "{\n" +
+				"\"ipVersion\": 6,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\"\n" +
+				"}";				;
+		HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
+	}
+
+	public void deleteFlow(String srcHost, String dstHost, String srcPort, String dstPort) {
+		RestResponse response;
+	}
+
+	public List<Meter> getMeters() throws IOException {
+		RestResponse response;
+        response = HttpTools.doJSONGet(new URL(metersEndpoint), user, password);
+        if(response != null && (response.getMessage().startsWith("{") ||  response.getMessage().startsWith("[")) && !response.getMessage().isEmpty() && !response.getMessage().equals("null\n")) {
+            return JsonParser.parseMeters(response.getMessage());
+        }
+        else return new ArrayList<Meter>();
+	}
+
+	public void createMeter(String srcHost, String dstHost, String srcPort, String dstPort, String portType, int rate, int burst) throws IOException {
+		String json = "{\n" +
+				"\"ipVersion\": 4,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\",\n"+
+				"	\"rate\":"+rate+",\n" + 
+				"	\"burst\":"+burst+"\n" +
+				"}";				;
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
+	}
+	
+	public void createMeterIpv6(String srcHost, String dstHost, String srcPort, String dstPort, String portType, int rate, int burst) throws IOException {
+		String json = "{\n" +
+				"\"ipVersion\": 6,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\",\n"+
+				"	\"rate\":"+rate+",\n" + 
+				"	\"burst\":"+burst+"\n" +
+				"}";				;
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
+	}
+
+	public void deleteMeter(String srcHost, String dstHost, String srcPort, String dstPort) {
+		RestResponse response;
+	}
+
+	public void getVpls(String vplsName) {
+		RestResponse response;
+	}
+
+	public void createVpls(String vplsName, List<String> hosts) {
+		RestResponse response;
+	}
+
+	public void deleteVpls(String vplsName) {
+		RestResponse response;
+	}
+	
+
 }
