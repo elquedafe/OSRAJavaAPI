@@ -1,10 +1,13 @@
+package org.osra;
 import java.io.IOException;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -80,14 +83,18 @@ public class OSRA {
 	 * @return socket
 	 * @throws IOException
 	 */
-	public Socket openTCPSocket(String ipAddress, int port, int rate, int burst) throws IOException{
+	public Socket openTCPSocket(String ipVersion, String srcHost, String dstHost, int srcPort, int dstPort, int rate, int burst) throws IOException{
 		Socket socket = null;
+		SocketAddress srcAddr = new InetSocketAddress(srcHost, srcPort);
+		SocketAddress dstAddr = new InetSocketAddress(dstHost, dstPort);
 		int localPort = -1;
 		String localAddress = "";
 
 		// Open socket
 		try {
-			socket = new Socket(ipAddress, port);
+			socket = new Socket();
+			socket.bind(srcAddr);
+			socket.connect(dstAddr);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
@@ -100,9 +107,11 @@ public class OSRA {
 		try {
 			//TEST only
 			//postMeter("10.0.0.1", localPort, "tcp", rate, burst);
+			
+			//TODO create flows INTENTS to host connectivity
 
 			// TODO: implementacion
-			postMeter(localAddress, localPort, "tcp", rate, burst);
+			postMeter(ipVersion, srcHost, dstHost, String.valueOf(localPort), String.valueOf(dstPort), "tcp", rate, burst);
 
 		} catch (IOException e) {
 			if (socket != null) {
@@ -112,36 +121,36 @@ public class OSRA {
 			throw e;
 		}
 		return socket;
-
 	}
 
-	public ServerSocket openUDPSocket(String ip, int port, int rate, int burst) throws IOException {
-		//DatagramSocket socket;
-		ServerSocket socket;
-		int localPort = -1;
-		String localAddress = "";
+	public DatagramSocket openUDPSocket(String ipVersion, String dstHost, int dstPort, int rate, int burst) throws IOException {
+		DatagramSocket socket;
+//		ServerSocket socket;
+		int srcPort = -1;
+		String srcHost = "";
 
 		try {
-			//socket = new DatagramSocket(port, InetAddress.getByName(ip));
-			socket = new ServerSocket(port, 10, InetAddress.getByName(ip));
+			socket = new DatagramSocket(dstPort, InetAddress.getByName(dstHost));
+			//TODO create flows INTENTS to host connectivity
+			
+//			socket = new ServerSocket(dstPort, 10, InetAddress.getByName(dstHost));
 		} catch (SocketException e) {
 			e.printStackTrace();
 			throw e;
 		}
 
 
-		localAddress = socket.getInetAddress().getHostAddress();
-		localPort = socket.getLocalPort();
+		srcHost = socket.getInetAddress().getHostAddress();
+		srcPort = socket.getLocalPort();
 
 		try {
-			postMeter(localAddress, localPort, "udp", rate, burst);
+			postMeter(ipVersion, srcHost, dstHost, String.valueOf(srcPort), String.valueOf(dstPort), "udp", rate, burst);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw e;
 		}
 
 		return socket;
-
 	}
 
 	/**
@@ -152,17 +161,20 @@ public class OSRA {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	private void postMeter(String localAddress, int localPort, String portType, int rate, int burst) throws MalformedURLException, IOException {
-		String body = "{\n" + 
-				"	\"host\": \""+localAddress+"\",\n" + 
-				"	\"port\": \""+localPort+"\",\n" + 
-				"	\"portType\": \""+portType+"\",\n" + 
-				"	\"rate\": "+rate+",\n" + 
-				"	\"burst\": "+burst+"\n" + 
+	private void postMeter(String ipVersion, String srcAdress, String dstAdress, String srcPort, String dstPort, String portType, int rate, int burst) throws MalformedURLException, IOException {
+		String body = "{\n" +
+				"	\"ipVersion\": "+ipVersion+",\n" + 
+				"	\"srcHost\": \""+srcAdress+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstAdress+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\",\n"+
+				"	\"rate\":"+rate+",\n" + 
+				"	\"burst\":"+burst+"\n" +
 				"}";
 
 		// Request meter
-		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+localAddress+"/"+localPort), body, user, password);
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+srcAdress+"/"+dstAdress), body, user, password);
 	}
 
 

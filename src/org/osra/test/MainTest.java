@@ -1,4 +1,4 @@
-
+package org.osra.test;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.List;
 
 import org.osra.architecture.*;
+import org.osra.*;
 
 
 public class MainTest {
