@@ -13,11 +13,13 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.osra.architecture.Environment;
 import org.osra.architecture.Flow;
 import org.osra.architecture.Meter;
 import org.osra.architecture.Switch;
+import org.osra.architecture.Vpls;
 import org.osra.tools.HttpTools;
 import org.osra.tools.JsonParser;
 import org.osra.tools.RestResponse;
@@ -25,7 +27,7 @@ import org.osra.tools.RestResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class OSRA {
+public class OSRA implements OSRAInterface{
 	private String restHost;
 	private String endpoint;
 	private String metersEndpoint;
@@ -280,7 +282,8 @@ public class OSRA {
 		HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
 	}
 	
-	public void createFlowsIpv6(String srcHost, String dstHost, String srcPort, String dstPort, String portType) throws IOException {
+	public Map<String, String> createFlowsIpv6(String srcHost, String dstHost, String srcPort, String dstPort, String portType) throws IOException {
+		RestResponse response;
 		String json = "{\n" +
 				"\"ipVersion\": 6,\n" + 
 				"	\"srcHost\": \""+srcHost+"\",\n" + 
@@ -289,7 +292,10 @@ public class OSRA {
 				"	\"dstPort\": \""+dstPort+"\",\n" +
 				"	\"portType\": \""+portType+"\"\n" +
 				"}";				;
-		HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+srcHost+"/"+dstHost), json, user, password);
+		response = HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+srcHost+"/"+dstHost+"/?element=host"), json, user, password);
+		Map<String, String> switches = JsonParser.parseIngressEgressSwitches(response.getMessage());
+		
+		return switches;
 	}
 
 	public void deleteFlow(String srcHost, String dstHost, String srcPort, String dstPort) {
@@ -337,16 +343,49 @@ public class OSRA {
 		RestResponse response;
 	}
 
-	public void getVpls(String vplsName) {
+	public List<Vpls> getVpls() throws IOException{
+		RestResponse response;
+		return null;
+	}
+
+	public void createVpls(String vplsName, List<String> hosts) throws IOException{
 		RestResponse response;
 	}
 
-	public void createVpls(String vplsName, List<String> hosts) {
+	public void deleteVpls(String vplsName) throws IOException{
 		RestResponse response;
 	}
 
-	public void deleteVpls(String vplsName) {
+	@Override
+	public void createFlowsIpv6(String ingress, String ingressPort, String egress, String egressPort, String srcHost, String dstHost, String srcPort,
+			String dstPort, String portType) throws IOException {
 		RestResponse response;
+		String json = "{\n" +
+				"\"ipVersion\": 6,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\"\n" +
+				"}";				;
+		response = HttpTools.doJSONPost(new URL(flowsEndpoint+"/"+ingress+"/"+egress+"/?element=switch"), json, user, password);
+	}
+
+	@Override
+	public void createMeterIpv6(String ingress, String srcHost, String dstHost, String srcPort, String dstPort,
+			String portType, int rate, int burst) throws IOException {
+		String json = "{\n" +
+				"\"ipVersion\": 6,\n" + 
+				"	\"srcHost\": \""+srcHost+"\",\n" + 
+				"	\"srcPort\": \""+srcPort+"\",\n" + 
+				"	\"dstHost\": \""+dstHost+"\",\n" + 
+				"	\"dstPort\": \""+dstPort+"\",\n" +
+				"	\"portType\": \""+portType+"\",\n"+
+				"	\"rate\":"+rate+",\n" + 
+				"	\"burst\":"+burst+"\n" +
+				"}";				;
+		HttpTools.doJSONPost(new URL(metersEndpoint+"/"+ingress), json, user, password);
+		
 	}
 	
 

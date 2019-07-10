@@ -85,4 +85,13 @@ public class JsonParser {
         return listMeters;
 	}
 
+	public static Map<String, String> parseIngressEgressSwitches(String message) {
+		Map<String, String> switches = new HashMap<String, String>();
+		Gson gson = new Gson();
+		LinkedTreeMap jsonObject = gson.fromJson(message, LinkedTreeMap.class);
+		switches.put("ingress", (String)jsonObject.get("ingress"));
+		switches.put("egress", (String)jsonObject.get("egress"));
+		return switches;
+	}
+
 }
