@@ -41,7 +41,7 @@ public class HttpTools {
             in = new BufferedReader (new InputStreamReader (content));
             String str = "";
             while ((line = in.readLine()) != null) {
-            	str += str+"\n";
+            	str += line+"\n";
             }
 
             response.setMessage(str);
