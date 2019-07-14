@@ -90,7 +90,9 @@ public class JsonParser {
 		Gson gson = new Gson();
 		LinkedTreeMap jsonObject = gson.fromJson(message, LinkedTreeMap.class);
 		switches.put("ingress", (String)jsonObject.get("ingress"));
+		switches.put("ingressPort", (String)jsonObject.get("ingressPort"));
 		switches.put("egress", (String)jsonObject.get("egress"));
+		switches.put("egressPort", (String)jsonObject.get("egressPort"));
 		return switches;
 	}
 
