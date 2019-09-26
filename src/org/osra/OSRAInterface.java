@@ -9,7 +9,9 @@ import java.util.Map;
 
 import org.osra.architecture.Environment;
 import org.osra.architecture.Flow;
+import org.osra.architecture.Host;
 import org.osra.architecture.Meter;
+import org.osra.architecture.Queue;
 import org.osra.architecture.Vpls;
 import org.osra.tools.HttpTools;
 
@@ -26,7 +28,21 @@ public interface OSRAInterface {
 	 * @return Socket opened socket
 	 * @throws IOException API REST connection exception 
 	 */
-	public Socket openTCPSocket(String ipVersion, String srcHost, String dstHost, int srcPort, int dstPort, int rate, int burst) throws IOException;
+	public Socket openTCPMeterSocket(String ipVersion, String srcHost, String dstHost, int srcPort, int dstPort, int rate, int burst) throws IOException;
+	
+	/**
+	 * Open a TCP QoS Socket for srcHost:srcPort and dstHost:dstPort using OpenFlow meters 
+	 * @param ipVersion hosts address IP version, 4 or 6
+	 * @param srcHost source host IP
+	 * @param dstHost destination host IP
+	 * @param srcPort source port
+	 * @param dstPort destination port
+	 * @param rate maximum rate for the socket
+	 * @param burst burst allowed for the socket
+	 * @return Socket opened socket
+	 * @throws IOException API REST connection exception 
+	 */
+	public Socket openTCPQueueSocket(String ipVersion, String srcHost, String dstHost, int srcPort, int dstPort, int minRate, int maxRate, int burst) throws IOException;
 	
 	/**
 	 * Open an UDP QoS Socket for dstHost:dstPort using OpenFlow meters
@@ -38,21 +54,47 @@ public interface OSRAInterface {
 	 * @return DatagramSocket opened socket
 	 * @throws IOException API REST connection exception
 	 */
-	public DatagramSocket openUDPSocket(String ipVersion, String dstHost, int dstPort, int rate, int burst) throws IOException;
+	public DatagramSocket openUDPMeterSocket(String ipVersion, String dstHost, int dstPort, int rate, int burst) throws IOException;
+	
+	/**
+	 * Open an UDP QoS Socket for dstHost:dstPort using OpenFlow meters
+	 * @param ipVersion hosts address IP version, 4 or 6
+	 * @param dstHost destination host IP
+	 * @param dstPort destination port
+	 * @param rate maximum rate for the socket
+	 * @param burst burst allowed for the socket
+	 * @return DatagramSocket opened socket
+	 * @throws IOException API REST connection exception
+	 */
+	public DatagramSocket openUDPQueueSocket(String ipVersion, String dstHost, int dstPort, int minRate, int maxRate, int burst) throws IOException;
 	
 	/**
 	 * Close TCP socket deleting OpenFlow meter associated to connection
 	 * @param socket
 	 * @throws IOException API REST connection exception
 	 */
-	public void closeTCPSocket(Socket socket) throws IOException;
+	public void closeTCPMeterSocket(Socket socket) throws IOException;
+	
+	/**
+	 * Close TCP socket deleting OpenFlow meter associated to connection
+	 * @param socket
+	 * @throws IOException API REST connection exception
+	 */
+	public void closeTCPQueueSocket(Socket socket) throws IOException;
 	
 	/**
 	 * Close UDP socket deleting OpenFlow meter associated to connection
 	 * @param socket
 	 * @throws IOException API REST connection exception
 	 */
-	public void closeUDPSocket(DatagramSocket socket) throws IOException;
+	public void closeUDPQueueSocket(DatagramSocket socket) throws IOException;
+	
+	/**
+	 * Close UDP socket deleting OpenFlow meter associated to connection
+	 * @param socket
+	 * @throws IOException API REST connection exception
+	 */
+	public void closeUDPMeterSocket(DatagramSocket socket) throws IOException;
 	
 	/**
 	 * Register user in the database
@@ -194,6 +236,14 @@ public interface OSRAInterface {
 	public void deleteMeter(String srcHost, String dstHost, String srcPort, String dstPort) throws IOException;
 	
 	/**
+	 * Delete meter given switchId and meterId
+	 * @param switchId
+	 * @param meterId
+	 * @throws IOException
+	 */
+	public void deleteMeter(String switchId, String meterId) throws IOException;
+	
+	/**
 	 * Get the list of vpls in the network
 	 * @return list of Vpls
 	 * @throws IOException API REST connection exception
@@ -206,7 +256,7 @@ public interface OSRAInterface {
 	 * @param hosts list of hosts in the Vpls
 	 * @throws IOException API REST connection exception
 	 */
-	public void createVpls(String vplsName, List<String> hosts) throws IOException;
+	public void createVpls(String vplsName, List<Host> hosts, String maxRate, String minRate, String burst) throws IOException;
 	
 	/**
 	 * Delete the Vpls with the given name
@@ -214,4 +264,43 @@ public interface OSRAInterface {
 	 * @throws IOException API REST connection exception
 	 */
 	public void deleteVpls(String vplsName) throws IOException;
+	
+	/**
+	 * Create a QoS from src and dst
+	 * @param ipVersion
+	 * @param srcHost
+	 * @param srcPort
+	 * @param dstHost
+	 * @param dstPort
+	 * @param portType
+	 * @param minRate
+	 * @param maxRate
+	 * @param burst
+	 * @throws IOException
+	 */
+	public List<Queue> createQueue(String ipVersion, String srcHost, String srcPort, 
+			String dstHost, String dstPort, String portType, 
+			int minRate, int maxRate, int burst) throws IOException;
+		
+	/**
+	 * Delete queue given its queueId
+	 * @param queueId
+	 * @throws IOException
+	 */
+	public void deleteQueue(String queueId) throws IOException;
+	
+	/**
+	 * Delete queue and its attachment to the switch port. Just useful when there is no more queues for that port
+	 * @param queueId
+	 * @throws IOException
+	 */
+	public void deleteQueuePort(String queueId) throws IOException;
+	
+	/**
+	 * Get the list of the queues in the network
+	 * @return
+	 * @throws IOException
+	 */
+	public List<Queue> getQueues() throws IOException;
+	
 }

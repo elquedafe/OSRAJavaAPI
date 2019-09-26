@@ -15,6 +15,7 @@ import org.osra.architecture.FlowSelector;
 import org.osra.architecture.FlowTreatment;
 import org.osra.architecture.Host;
 import org.osra.architecture.Meter;
+import org.osra.architecture.Queue;
 import org.osra.architecture.Switch;
 
 import com.google.gson.Gson;
@@ -94,6 +95,18 @@ public class JsonParser {
 		switches.put("egress", (String)jsonObject.get("egress"));
 		switches.put("egressPort", (String)jsonObject.get("egressPort"));
 		return switches;
+	}
+
+	public static List<Queue> parseQueues(String json) {
+		Gson gson = new Gson();
+        List<Queue> listQueues = new ArrayList<Queue>();
+        Queue q = null;
+        List auxList = (ArrayList)gson.fromJson(json, ArrayList.class);
+        for(Object o : auxList){
+            q = gson.fromJson(gson.toJson(o), Queue.class);
+            listQueues.add(q);
+        }
+        return listQueues;
 	}
 
 }
