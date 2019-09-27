@@ -3,7 +3,11 @@ package org.osra.architecture;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Represents a flow treatment
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class FlowTreatment {
 	private List<FlowInstruction> flowInstructions;
 

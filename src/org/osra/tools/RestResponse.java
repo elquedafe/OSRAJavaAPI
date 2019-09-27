@@ -1,5 +1,10 @@
 package org.osra.tools;
 
+/**
+ * Represent a API REST response to client
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class RestResponse {
 	private String message;
 	private int code;

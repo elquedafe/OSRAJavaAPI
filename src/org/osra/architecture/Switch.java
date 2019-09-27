@@ -7,6 +7,11 @@ import java.util.Map;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+/**
+ * Represents a switch
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class Switch {
 	private String id;
     private String type;

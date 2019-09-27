@@ -24,7 +24,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 
+/**
+ * Represents a JSON parser
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class JsonParser {
+	/**
+	 * Parse flows
+	 * @param json json to parse
+	 * @return flow list
+	 */
 	public static List<Flow> parseFlows(String json) {
 		Gson gson = new Gson();
 		List<Flow> listFlows = new ArrayList<Flow>();
@@ -44,6 +54,11 @@ public class JsonParser {
 		return listFlows;
 	}
 
+	/**
+	 * Parse environment
+	 * @param json json to parse
+	 * @return environment
+	 */
 	public static Environment parseEnvironment(String json) {
 		Gson gson = new Gson();
 		Environment environment = new Environment();
@@ -74,6 +89,11 @@ public class JsonParser {
 		return environment;
 	}
 
+	/**
+	 * Parse meters
+	 * @param json json to parse
+	 * @return meters list
+	 */
 	public static List<Meter> parseMeters(String json) {
 		Gson gson = new Gson();
         List<Meter> listMeters = new ArrayList<Meter>();
@@ -86,6 +106,11 @@ public class JsonParser {
         return listMeters;
 	}
 
+	/**
+	 * Parse ingress and egress switches
+	 * @param message json to parse
+	 * @return ingres and egress id and ports
+	 */
 	public static Map<String, String> parseIngressEgressSwitches(String message) {
 		Map<String, String> switches = new HashMap<String, String>();
 		Gson gson = new Gson();
@@ -97,6 +122,11 @@ public class JsonParser {
 		return switches;
 	}
 
+	/**
+	 * Parse queues
+	 * @param json json to parse
+	 * @return queues list
+	 */
 	public static List<Queue> parseQueues(String json) {
 		Gson gson = new Gson();
         List<Queue> listQueues = new ArrayList<Queue>();

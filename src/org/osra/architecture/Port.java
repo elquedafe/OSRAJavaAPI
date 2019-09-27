@@ -2,6 +2,11 @@ package org.osra.architecture;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+/**
+ * Represents a port
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class Port {
 	private String ovs;
 	private boolean isEnabled;

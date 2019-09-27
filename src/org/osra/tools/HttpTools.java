@@ -10,9 +10,22 @@ import java.net.URL;
 import java.util.Base64;
 
 
-
+/**
+ * Represents a http manager.
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class HttpTools {
 
+	/**
+	 * Do POST
+	 * @param url url to post
+	 * @param body json
+	 * @param user user
+	 * @param password password
+	 * @return response
+	 * @throws IOException
+	 */
 	public static RestResponse doJSONPost(URL url, String body, String user, String password) throws IOException{
 		String encoding;
 		String line;
@@ -38,15 +51,15 @@ public class HttpTools {
 
 			//MAYBE COMENTAR
 			InputStream content = (InputStream)connection.getInputStream();
-            in = new BufferedReader (new InputStreamReader (content));
-            String str = "";
-            while ((line = in.readLine()) != null) {
-            	str += line+"\n";
-            }
+			in = new BufferedReader (new InputStreamReader (content));
+			String str = "";
+			while ((line = in.readLine()) != null) {
+				str += line+"\n";
+			}
 
-            response.setMessage(str);
+			response.setMessage(str);
 			response.setCode(connection.getResponseCode());
-			
+
 		} catch (IOException e) {
 			throw new IOException(e);
 		}
@@ -63,6 +76,14 @@ public class HttpTools {
 		return response;
 	}
 
+	/**
+	 * Do delete
+	 * @param url url to delete
+	 * @param user user 
+	 * @param password password
+	 * @return response
+	 * @throws IOException
+	 */
 	public static RestResponse doDelete(URL url, String user, String password) throws IOException{
 		String encoding;
 		String line;
@@ -71,22 +92,22 @@ public class HttpTools {
 		OutputStreamWriter osw = null;
 		BufferedReader in = null;
 		BufferedReader inError = null;
-		
+
 		try {
 			encoding = Base64.getEncoder().encodeToString((user + ":"+ password).getBytes("UTF-8"));
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("DELETE");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Authorization", "Basic " + encoding);
-			
+
 			//MAYBE COMENTAR
 			InputStream content = (InputStream)connection.getInputStream();
-            in = new BufferedReader (new InputStreamReader (content));
-            String str = "";
-            while ((line = in.readLine()) != null) {
-            	str += str+"\n";
-            }
-			
+			in = new BufferedReader (new InputStreamReader (content));
+			String str = "";
+			while ((line = in.readLine()) != null) {
+				str += str+"\n";
+			}
+
 			response.setMessage(str);
 			response.setCode(connection.getResponseCode());
 
@@ -107,20 +128,28 @@ public class HttpTools {
 		return response;
 	}
 
+	/**
+	 * Do get
+	 * @param url url to get
+	 * @param user user
+	 * @param password password 
+	 * @return response
+	 * @throws IOException
+	 */
 	public static RestResponse doJSONGet(URL url, String user, String password) throws IOException{
 		String encoding;
 		RestResponse response = new RestResponse();
 		String line;
 		String json="";
 		HttpURLConnection connection = null;
-		
+
 		try {
 			encoding = Base64.getEncoder().encodeToString((user + ":"+ password).getBytes("UTF-8"));
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Authorization", "Basic " + encoding);
-			
+
 			InputStream content = (InputStream)connection.getInputStream();
 			response.setCode(connection.getResponseCode());
 			BufferedReader in   = 
@@ -137,7 +166,7 @@ public class HttpTools {
 			if(connection != null)
 				connection.disconnect();
 		}
-		
+
 		return response;
 	}
 

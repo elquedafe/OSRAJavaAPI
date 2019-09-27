@@ -29,6 +29,11 @@ import org.osra.tools.RestResponse;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
+/**
+ * Represents a osra server
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class OSRA implements OSRAInterface{
 	private String restHost;
 	private String endpoint;
@@ -121,15 +126,7 @@ public class OSRA implements OSRAInterface{
 
 	}
 
-	/**
-	 * Open a TCP socket with given maximum bandwidth and burst
-	 * @param ipAddress ipAddress to connect
-	 * @param port port to connect
-	 * @param rate maximum bandwidth for this socket
-	 * @param burst maximum rate for this socket
-	 * @return socket
-	 * @throws IOException
-	 */
+	
 	public Socket openTCPMeterSocket(String ipVersion, String srcHost, String dstHost, int srcPort, int dstPort, int rate, int burst) throws IOException{
 		Socket socket = null;
 		SocketAddress srcAddr = new InetSocketAddress(srcHost, srcPort);

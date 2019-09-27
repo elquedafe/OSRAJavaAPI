@@ -3,6 +3,11 @@ package org.osra.architecture;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a flow selector
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class FlowSelector {
 	private List<FlowCriteria> flowCriterias;
 

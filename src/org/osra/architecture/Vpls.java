@@ -3,6 +3,11 @@ package org.osra.architecture;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * Represents a VPLS
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class Vpls {
 	private String name;
     private List<String> interfaces;

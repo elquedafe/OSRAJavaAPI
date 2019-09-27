@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a host
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class Host {
 	private String id;
 	private String mac;

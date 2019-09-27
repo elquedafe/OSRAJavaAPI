@@ -15,6 +15,11 @@ import org.osra.architecture.Queue;
 import org.osra.architecture.Vpls;
 import org.osra.tools.HttpTools;
 
+/**
+ * Osra interface
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public interface OSRAInterface {
 	/**
 	 * Open a TCP QoS Socket for srcHost:srcPort and dstHost:dstPort using OpenFlow meters 
@@ -70,28 +75,28 @@ public interface OSRAInterface {
 	
 	/**
 	 * Close TCP socket deleting OpenFlow meter associated to connection
-	 * @param socket
+	 * @param socket socket to close
 	 * @throws IOException API REST connection exception
 	 */
 	public void closeTCPMeterSocket(Socket socket) throws IOException;
 	
 	/**
 	 * Close TCP socket deleting OpenFlow meter associated to connection
-	 * @param socket
+	 * @param socket socket to close
 	 * @throws IOException API REST connection exception
 	 */
 	public void closeTCPQueueSocket(Socket socket) throws IOException;
 	
 	/**
 	 * Close UDP socket deleting OpenFlow meter associated to connection
-	 * @param socket
+	 * @param socket socket to close
 	 * @throws IOException API REST connection exception
 	 */
 	public void closeUDPQueueSocket(DatagramSocket socket) throws IOException;
 	
 	/**
 	 * Close UDP socket deleting OpenFlow meter associated to connection
-	 * @param socket
+	 * @param socket scket to close
 	 * @throws IOException API REST connection exception
 	 */
 	public void closeUDPMeterSocket(DatagramSocket socket) throws IOException;
@@ -284,21 +289,21 @@ public interface OSRAInterface {
 		
 	/**
 	 * Delete queue given its queueId
-	 * @param queueId
+	 * @param queueId queue id
 	 * @throws IOException
 	 */
 	public void deleteQueue(String queueId) throws IOException;
 	
 	/**
 	 * Delete queue and its attachment to the switch port. Just useful when there is no more queues for that port
-	 * @param queueId
+	 * @param queueId queue id
 	 * @throws IOException
 	 */
 	public void deleteQueuePort(String queueId) throws IOException;
 	
 	/**
 	 * Get the list of the queues in the network
-	 * @return
+	 * @return queue list
 	 * @throws IOException
 	 */
 	public List<Queue> getQueues() throws IOException;

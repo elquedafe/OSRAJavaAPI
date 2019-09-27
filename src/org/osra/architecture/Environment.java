@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents the SDN network environment
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class Environment {
     private Map<String, Switch> mapSwitches;
     private List<Cluster> listClusters;

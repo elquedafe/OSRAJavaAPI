@@ -3,6 +3,11 @@ package org.osra.architecture;
 import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
 
+/**
+ * Represents a flow criteria
+ * @author Alvaro Luis Martinez
+ * @version 1.0
+ */
 public class FlowCriteria {
 	private String type;
     private SimpleEntry<String,String> criteria;
